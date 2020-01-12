@@ -7,6 +7,8 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+type DWORD int32
+
 var setCursorPos *windows.LazyProc
 var getCursorPos *windows.LazyProc
 var mouseEvent *windows.LazyProc
@@ -64,6 +66,21 @@ func MouseEvent(MOUSEINPUT uint16, p *POINT) bool {
 		uintptr(MOUSEINPUT),
 		uintptr(p.X),
 		uintptr(p.Y),
+	)
+
+	return ret != 0
+}
+
+func Scroll(delta DWORD) bool {
+	ret, _, _ := syscall.Syscall6(
+		mouseEvent.Addr(),
+		5,
+		uintptr(MOUSEEVENTF_WHEEL),
+		0,
+		0,
+		uintptr(delta),
+		0,
+		0,
 	)
 
 	return ret != 0
