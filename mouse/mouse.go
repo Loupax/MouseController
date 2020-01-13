@@ -85,8 +85,3 @@ func Scroll(delta DWORD) bool {
 
 	return ret != 0
 }
-
-// void sendMouseRightclick(Point p)
-// {
-//     mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, p.X, p.Y, 0, 0);
-// }
