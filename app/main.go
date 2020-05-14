@@ -21,6 +21,8 @@ func main() {
 
 	lmbDown := false
 	rmbDown := false
+	lmbTurboDown := false
+	ch := make(chan int, 1)
 	for {
 		if err := xinput.GetState(0, state); err != nil {
 			panic(fmt.Errorf("Controller 0 error: %w", err))
@@ -59,6 +61,32 @@ func main() {
 		if rmbDown == true && (xinput.BUTTON_B&xinput.Button(state.Gamepad.Buttons) != xinput.BUTTON_B) {
 			mouse.MouseEvent(mouse.MOUSEEVENTF_RIGHTUP, point)
 			rmbDown = false
+		}
+
+		if lmbTurboDown == false && (xinput.BUTTON_Y&xinput.Button(state.Gamepad.Buttons) == xinput.BUTTON_Y) {
+			go func(done chan int, point *mouse.POINT) {
+				for {
+
+					select {
+
+					case <-done:
+						return
+					default:
+						mouse.MouseEvent(mouse.MOUSEEVENTF_LEFTDOWN, point)
+						time.Sleep(time.Millisecond * 25)
+						mouse.MouseEvent(mouse.MOUSEEVENTF_LEFTUP, point)
+					}
+				}
+			}(ch, point)
+			// Start turbo clicking
+			//mouse.MouseEvent(mouse.MOUSEEVENTF_LEFTDOWN, point)
+			lmbTurboDown = true
+		}
+		if lmbTurboDown == true && (xinput.BUTTON_Y&xinput.Button(state.Gamepad.Buttons) != xinput.BUTTON_Y) {
+			ch <- 1
+			// Stop turbo clicking
+			//mouse.MouseEvent(mouse.MOUSEEVENTF_LEFTDOWN, point)
+			lmbTurboDown = false
 		}
 
 		if xinput.BACK&xinput.Button(state.Gamepad.Buttons) == xinput.BACK {
